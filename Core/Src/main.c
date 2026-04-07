@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -27,7 +28,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+TIM_HandleTypeDef htim2;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -40,6 +41,10 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+volatile uint8_t game_update_flag = 0;
+uint8_t game_running = 0;
+uint8_t jump_active = 0;
+uint32_t score = 0;
 
 /* USER CODE BEGIN PV */
 
@@ -47,6 +52,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -74,16 +80,7 @@ int get_key_val()
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	unsigned char key_num = 0;
-	unsigned char cactus_category = 0;
-	unsigned char cactus_length = 8;
-	unsigned int score = 0;
-	unsigned int highest_score = 0;
-	int height = 0;
-	int cactus_pos = 128;
-	unsigned char cur_speed = 30;
-	char failed = 0;
-	char reset = 0;
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -104,15 +101,14 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   OLED_Init();
-  OLED_ShowString(0,0,"Test",4);
-	//while(1);
-	OLED_DrawCover();
+  OLED_DrawCover();
 
-	while(get_key_val()!=2);
-	HAL_Delay(100);
-	OLED_Clear();
+  while(get_key_val()!=2);
+  HAL_Delay(100);
+  OLED_Clear();
 
   /* USER CODE END 2 */
 
@@ -122,69 +118,58 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-
-		if (failed == 1)
-		{
-			OLED_DrawRestart();
-
-			key_num = get_key_val();
-			if (key_num == 2)
-			{
-				if(score > highest_score) highest_score = score;
-				score = 0;
-				failed = 0;
-				height = 0;
-				reset = 1;
-				OLED_DrawDinoJump(reset);
-				OLED_DrawCactusRandom(cactus_category, reset);
-				OLED_Clear();
-			}
-			continue;
-		}
-
-
-		score ++;
-		if (height <= 0) key_num = get_key_val();
-
-		OLED_DrawGround();
-		OLED_DrawCloud();
-
-		if (height>0 || key_num == 1) height = OLED_DrawDinoJump(reset);
-		else OLED_DrawDino();
-
-		cactus_pos = OLED_DrawCactusRandom(cactus_category, reset);
-		if(cactus_category == 0) cactus_length = 8;
-		else if(cactus_category == 1) cactus_length = 16;
-		else cactus_length = 24;
-
-		if (cactus_pos + cactus_length < 0)
-		{
-		  cactus_category = rand()%4;
-			OLED_DrawCactusRandom(cactus_category, 1);
-		}
-
-		if ((height < 16) && ( (cactus_pos>=16 && cactus_pos <=32) || (cactus_pos + cactus_length>=16 && cactus_pos + cactus_length <=32)))
-		{
-			failed = 1;
-		}
-
-		OLED_ShowString(35, 0, "HI:", 12);
-		OLED_ShowNum(58, 0, highest_score, 5, 12);
-		OLED_ShowNum(98, 0, score, 5, 12);
-
-
-		reset = 0;
-
-		cur_speed = score/20;
-		if (cur_speed > 29) cur_speed = 29;
-		HAL_Delay(30 - cur_speed);
-//		HAL_Delay(500);
-		key_num = 0;
     /* USER CODE BEGIN 3 */
+    if (get_key_val() == 2) { // Start/Restart button
+      game_running = 1;
+      jump_active = 0;
+      score = 0;
+      cactus_pos = 128;
+      OLED_DrawDinoJump(1); // Reset jump
+      OLED_Clear();
+      HAL_Delay(100);
+    }
+
+    if (game_running) {
+      if (get_key_val() == 1 && !jump_active) { // Jump button, start jump if not already jumping
+        jump_active = 1;
+        OLED_DrawDinoJump(0); // Start jump
+      }
+
+      if (game_update_flag) {
+        game_update_flag = 0;
+
+        // Update game
+        OLED_Clear();
+
+        // Draw dino
+        if (jump_active) {
+          int height = OLED_DrawDinoJump(0);
+          if (height == 0) {
+            jump_active = 0; // Jump finished
+          }
+        } else {
+          OLED_DrawDino();
+        }
+
+        // Draw cactus
+        int current_cactus_pos = OLED_DrawCactus();
+
+        // Check collision
+        if (current_cactus_pos <= 32 && current_cactus_pos >= 16 && !jump_active) {
+          game_running = 0;
+          OLED_DrawRestart();
+          OLED_ShowString(10, 3, "GAME", 16);
+          OLED_ShowString(86, 3, "OVER", 16);
+        }
+
+        // Update score
+        score++;
+        OLED_ShowNum(80, 0, score, 5, 16);
+      }
+    }
   }
   /* USER CODE END 3 */
 }
-
 
 /**
   * @brief System Clock Configuration
@@ -225,8 +210,35 @@ void SystemClock_Config(void)
   }
 }
 
-/* USER CODE BEGIN 4 */
+  /* USER CODE BEGIN 4 */
+void MX_TIM2_Init(void)
+{
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
 
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 7199;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 99;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  HAL_TIM_Base_Start_IT(&htim2);
+}
 /* USER CODE END 4 */
 
 /**

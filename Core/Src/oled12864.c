@@ -371,7 +371,7 @@ void OLED_DrawCloud()
 	static int pos = 128;
 	static char height=0;
 	char speed = 3;
-	unsigned int i=0;
+
 	int x;
 	int start_x = 0;
 	int length = sizeof(CLOUD);
@@ -444,7 +444,7 @@ void OLED_DrawDino()
 }
 
 // 绘制仙人掌障碍物
-void OLED_DrawCactus()
+int OLED_DrawCactus()
 {
 	char speed = 5;
 	static int pos = 128;
@@ -491,6 +491,7 @@ void OLED_DrawCactus()
 	}
 	oled_drawbmp_block_clear(pos + length, 6, speed); // 清除残影
 	pos = pos - speed;
+	return pos;
 }
 
 
@@ -502,7 +503,7 @@ int OLED_DrawCactusRandom(unsigned char ver, unsigned char reset)
 	int start_x = 0;
 	int length = 0;
 
-	unsigned int i=0, j=0;
+	unsigned int j=0;
 	unsigned char x, y;
 	unsigned char byte;
 	if (reset == 1)
@@ -562,7 +563,7 @@ int OLED_DrawCactusRandom(unsigned char ver, unsigned char reset)
 int OLED_DrawDinoJump(char reset)
 {
 	char speed_arr[] = {1, 1, 3, 3, 4, 4, 5, 6, 7};
-	static char speed_idx = sizeof(speed_arr)-1;
+	static signed char speed_idx = sizeof(speed_arr)-1;
 	static int height = 0;
 	static char dir = 0;
 	//char speed = 4;

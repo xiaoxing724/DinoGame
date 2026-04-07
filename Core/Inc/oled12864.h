@@ -44,29 +44,29 @@ void OLED_DrawBMP(unsigned char x0, unsigned char y0,unsigned char x1, unsigned 
 void Delay_50ms(unsigned int Del_50ms);
 void Delay_1ms(unsigned int Del_1ms);
 void OLED_FillPicture(unsigned char fill_Data);
-void Picture();
-void IIC_Start();
-void IIC_Stop();
+void Picture(void);
+void IIC_Start(void);
+void IIC_Stop(void);
 void IIC_WriteCommand(unsigned char IIC_Command);
 void IIC_WriteData(unsigned char IIC_Data);
 void IIC_WriteByte(unsigned char IIC_Byte);
 
-void IIC_WaitAck();
+void IIC_WaitAck(void);
 
 // 快速绘制图像
 void OLED_DrawBMPFast(const unsigned char BMP[]);
 
 // 显示地面
-void OLED_DrawGround();
+void OLED_DrawGround(void);
 
 // 绘制云朵
-void OLED_DrawCloud();
+void OLED_DrawCloud(void);
 
 // 绘制小恐龙
-void OLED_DrawDino();
+void OLED_DrawDino(void);
 
 // 绘制仙人掌障碍物
-void OLED_DrawCactus();
+int OLED_DrawCactus(void);
 
 // 绘制跳跃小恐龙
 int OLED_DrawDinoJump(char reset);
@@ -75,9 +75,9 @@ int OLED_DrawDinoJump(char reset);
 int OLED_DrawCactusRandom(unsigned char ver, unsigned char reset);
 
 // 绘制重启
-void OLED_DrawRestart();
+void OLED_DrawRestart(void);
 // 绘制封面
-void OLED_DrawCover();
+void OLED_DrawCover(void);
 #endif
 
 
