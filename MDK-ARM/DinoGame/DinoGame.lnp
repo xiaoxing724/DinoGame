@@ -1,0 +1,25 @@
+--cpu Cortex-M3
+"dinogame\startup_stm32f103xb.o"
+"dinogame\oled12864.o"
+"dinogame\main.o"
+"dinogame\gpio.o"
+"dinogame\stm32f1xx_it.o"
+"dinogame\stm32f1xx_hal_msp.o"
+"dinogame\stm32f1xx_hal_gpio_ex.o"
+"dinogame\stm32f1xx_hal_tim.o"
+"dinogame\stm32f1xx_hal_tim_ex.o"
+"dinogame\stm32f1xx_hal.o"
+"dinogame\stm32f1xx_hal_rcc.o"
+"dinogame\stm32f1xx_hal_rcc_ex.o"
+"dinogame\stm32f1xx_hal_gpio.o"
+"dinogame\stm32f1xx_hal_dma.o"
+"dinogame\stm32f1xx_hal_cortex.o"
+"dinogame\stm32f1xx_hal_pwr.o"
+"dinogame\stm32f1xx_hal_flash.o"
+"dinogame\stm32f1xx_hal_flash_ex.o"
+"dinogame\stm32f1xx_hal_exti.o"
+"dinogame\system_stm32f1xx.o"
+--strict --scatter "DinoGame\DinoGame.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "DinoGame.map" -o DinoGame\DinoGame.axf
