@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -123,7 +122,6 @@ int main(void)
       game_running = 1;
       jump_active = 0;
       score = 0;
-      cactus_pos = 128;
       OLED_DrawDinoJump(1); // Reset jump
       OLED_Clear();
       HAL_Delay(100);
@@ -151,10 +149,10 @@ int main(void)
           OLED_DrawDino();
         }
 
-        // Draw cactus
+        // Draw cactus and get current x position
         int current_cactus_pos = OLED_DrawCactus();
 
-        // Check collision
+        // Check collision and stop game if hit
         if (current_cactus_pos <= 32 && current_cactus_pos >= 16 && !jump_active) {
           game_running = 0;
           OLED_DrawRestart();
@@ -237,6 +235,9 @@ void MX_TIM2_Init(void)
   {
     Error_Handler();
   }
+
+  HAL_NVIC_SetPriority(TIM2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(TIM2_IRQn);
   HAL_TIM_Base_Start_IT(&htim2);
 }
 /* USER CODE END 4 */
