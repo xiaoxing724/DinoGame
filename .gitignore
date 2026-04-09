@@ -1,1 +1,12 @@
 MDK-ARM/DinoGame.uvoptx
+MDK-ARM/DinoGame.uvguix.*
+MDK-ARM/DinoGame/*.axf
+MDK-ARM/DinoGame/*.hex
+MDK-ARM/DinoGame/*.htm
+MDK-ARM/DinoGame/*.lnp
+MDK-ARM/DinoGame/*.map
+MDK-ARM/DinoGame/*.dep
+MDK-ARM/DinoGame/*.crf
+MDK-ARM/DinoGame/*.d
+MDK-ARM/DinoGame/*.o
+MDK-ARM/DinoGame/*.lst

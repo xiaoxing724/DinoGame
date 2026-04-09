@@ -26,5 +26,7 @@ dinogame\oled12864.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_cortex.h
 dinogame\oled12864.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h
 dinogame\oled12864.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h
 dinogame\oled12864.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h
+dinogame\oled12864.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
+dinogame\oled12864.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 dinogame\oled12864.o: D:\MDK543a\ARM\ARMCC\Bin\..\include\stdlib.h
 dinogame\oled12864.o: ../Core/Inc/oledfont.h

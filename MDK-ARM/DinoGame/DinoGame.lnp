@@ -3,6 +3,7 @@
 "dinogame\oled12864.o"
 "dinogame\main.o"
 "dinogame\gpio.o"
+"dinogame\tim.o"
 "dinogame\stm32f1xx_it.o"
 "dinogame\stm32f1xx_hal_msp.o"
 "dinogame\stm32f1xx_hal_gpio_ex.o"

@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "tim.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -27,7 +28,10 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-TIM_HandleTypeDef htim2;
+volatile uint8_t game_update_flag = 0;
+uint8_t game_running = 0;
+uint8_t jump_active = 0;
+uint32_t score = 0;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -40,10 +44,6 @@ TIM_HandleTypeDef htim2;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-volatile uint8_t game_update_flag = 0;
-uint8_t game_running = 0;
-uint8_t jump_active = 0;
-uint32_t score = 0;
 
 /* USER CODE BEGIN PV */
 
@@ -51,7 +51,7 @@ uint32_t score = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-void MX_TIM2_Init(void);
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -101,6 +101,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_TIM2_Init();
+  HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE BEGIN 2 */
   OLED_Init();
   OLED_DrawCover();
@@ -156,8 +157,6 @@ int main(void)
         if (current_cactus_pos <= 32 && current_cactus_pos >= 16 && !jump_active) {
           game_running = 0;
           OLED_DrawRestart();
-          OLED_ShowString(10, 3, "GAME", 16);
-          OLED_ShowString(86, 3, "OVER", 16);
         }
 
         // Update score
@@ -208,38 +207,7 @@ void SystemClock_Config(void)
   }
 }
 
-  /* USER CODE BEGIN 4 */
-void MX_TIM2_Init(void)
-{
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-
-  htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 7199;
-  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 99;
-  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  HAL_NVIC_SetPriority(TIM2_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(TIM2_IRQn);
-  HAL_TIM_Base_Start_IT(&htim2);
-}
+/* USER CODE BEGIN 4 */
 /* USER CODE END 4 */
 
 /**
@@ -255,6 +223,14 @@ void Error_Handler(void)
   {
   }
   /* USER CODE END Error_Handler_Debug */
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if (htim->Instance == TIM2)
+  {
+    game_update_flag = 1;
+  }
 }
 
 #ifdef  USE_FULL_ASSERT

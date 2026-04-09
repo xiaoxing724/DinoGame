@@ -55,7 +55,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-
+extern TIM_HandleTypeDef htim2;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -198,11 +198,6 @@ void SysTick_Handler(void)
 /* please refer to the startup file (startup_stm32f1xx.s).                    */
 /******************************************************************************/
 
-/* USER CODE BEGIN 1 */
-extern TIM_HandleTypeDef htim2;
-extern volatile uint8_t game_update_flag;
-/* USER CODE END 1 */
-
 /**
   * @brief This function handles TIM2 global interrupt.
   */
@@ -213,6 +208,11 @@ void TIM2_IRQHandler(void)
   /* USER CODE END TIM2_IRQn 0 */
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
-  game_update_flag = 1;
+
   /* USER CODE END TIM2_IRQn 1 */
 }
+
+/* USER CODE BEGIN 1 */
+extern TIM_HandleTypeDef htim2;
+extern volatile uint8_t game_update_flag;
+/* USER CODE END 1 */
