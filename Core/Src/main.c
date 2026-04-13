@@ -31,7 +31,10 @@
 volatile uint8_t game_update_flag = 0;
 uint8_t game_running = 0;
 uint8_t jump_active = 0;
+uint8_t game_passed = 0;
 uint32_t score = 0;
+uint32_t high_score = 0;
+uint32_t game_end_tick = 0;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -104,7 +107,7 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE BEGIN 2 */
   OLED_Init();
-  OLED_DrawCover();
+  OLED_DrawCover(high_score);
 
   while(get_key_val()!=2);
   HAL_Delay(100);
@@ -119,17 +122,22 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    if (get_key_val() == 2) { // Start/Restart button
+    uint8_t key = get_key_val();
+
+    if (key == 2) { // Start/Restart button
       game_running = 1;
       jump_active = 0;
+      game_passed = 0;
       score = 0;
+      game_end_tick = 0;
+      OLED_ResetCactus();
       OLED_DrawDinoJump(1); // Reset jump
       OLED_Clear();
       HAL_Delay(100);
     }
 
     if (game_running) {
-      if (get_key_val() == 1 && !jump_active) { // Jump button, start jump if not already jumping
+      if (key == 1 && !jump_active) { // Jump button, start jump if not already jumping
         jump_active = 1;
         OLED_DrawDinoJump(0); // Start jump
       }
@@ -139,6 +147,7 @@ int main(void)
 
         // Update game
         OLED_Clear();
+        OLED_DrawCloud();
 
         // Draw dino
         if (jump_active) {
@@ -156,13 +165,37 @@ int main(void)
         // Check collision and stop game if hit
         if (current_cactus_pos <= 32 && current_cactus_pos >= 16 && !jump_active) {
           game_running = 0;
-          OLED_DrawRestart();
+          game_passed = 0;
+          OLED_DrawRestart(0);
+          game_end_tick = HAL_GetTick();
         }
 
         // Update score
         score++;
-        OLED_ShowNum(80, 0, score, 5, 16);
+        OLED_ShowNum(100, 0, score, 3, 16);
+
+        // Check if score reaches 200, end game
+        if (score >= 1000) {
+          game_running = 0;
+          game_passed = 1;
+          OLED_DrawRestart(1);
+          game_end_tick = HAL_GetTick();
+        }
       }
+    }
+
+    if (!game_running && game_end_tick) {
+      if (key != 0) {
+        game_end_tick = HAL_GetTick();
+      } else if (HAL_GetTick() - game_end_tick >= 3000) {
+        OLED_DrawCover(high_score);
+        game_end_tick = 0;
+      }
+    }
+
+    // Update high score if game ended
+    if (!game_running && score > high_score) {
+      high_score = score;
     }
   }
   /* USER CODE END 3 */

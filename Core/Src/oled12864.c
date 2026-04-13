@@ -253,17 +253,17 @@ void OLED_ShowNum(u8 x,u8 y,u32 num,u8 len,u8 size2)
 	for(t=0;t<len;t++)
 	{
 		temp=(num/oled_pow(10,len-t-1))%10;
-		if(enshow==0&&t<(len-1))
+		if(enshow==0 && t<(len-1))
 		{
 			if(temp==0)
 			{
-//				OLED_ShowChar(x+(size2/2)*t,y,' ',size2);
-				OLED_ShowChar(x+(size2/2)*t,y,'0',size2);
+				OLED_ShowChar(x+(size2/2)*t,y,' ',size2);
 				continue;
-			}else enshow=1;
+			}
+			else enshow=1;
 
 		}
-	 	OLED_ShowChar(x+(size2/2)*t,y,temp+'0',size2);
+		OLED_ShowChar(x+(size2/2)*t,y,temp+'0',size2);
 	}
 }
 //显示一个字符号串
@@ -365,6 +365,8 @@ void OLED_DrawGround()
 }
 
 
+static int cactus_pos = 128;
+
 // 绘制云朵
 void OLED_DrawCloud()
 {
@@ -376,8 +378,6 @@ void OLED_DrawCloud()
 	int start_x = 0;
 	int length = sizeof(CLOUD);
 	unsigned char byte;
-
-	//if (pos + length <= -speed) pos = 128;
 
 	if (pos + length <= -speed)
 	{
@@ -411,6 +411,12 @@ void OLED_DrawCloud()
 	IIC_Stop();
 
 	pos = pos - speed;
+}
+
+void OLED_ResetCactus(void)
+{
+	oled_drawbmp_block_clear(0, 6, 5);
+	cactus_pos = 128;
 }
 
 // 绘制小恐龙
@@ -447,7 +453,6 @@ void OLED_DrawDino()
 int OLED_DrawCactus()
 {
 	char speed = 5;
-	static int pos = 128;
 	int start_x = 0;
 	int length = sizeof(CACTUS_2)/2;
 
@@ -455,22 +460,22 @@ int OLED_DrawCactus()
 	unsigned char x, y;
 	unsigned char byte;
 
-	if (pos + length <= 0)
+	if (cactus_pos + length <= 0)
 	{
 		oled_drawbmp_block_clear(0, 6, speed);
-		pos = 128;
+		cactus_pos = 128;
 	}
 
 	for(y=0; y<2; y++)
 	{
-		if(pos < 0)
+		if(cactus_pos < 0)
 		{
-			start_x = -pos;
+			start_x = -cactus_pos;
 			OLED_SetPos(0, 6+y);
 		}
 		else
 		{
-			OLED_SetPos(pos, 6+y);
+			OLED_SetPos(cactus_pos, 6+y);
 		}
 
 		IIC_Start();
@@ -481,7 +486,7 @@ int OLED_DrawCactus()
 
 		for (x = start_x; x < length; x++)
 		{
-			if (pos + x > 127) break;
+			if (cactus_pos + x > 127) break;
 			j = y*length + x;
 			byte = CACTUS_2[j];
 			IIC_WriteByte(byte);
@@ -489,9 +494,9 @@ int OLED_DrawCactus()
 		}
 		IIC_Stop();
 	}
-	oled_drawbmp_block_clear(pos + length, 6, speed); // 清除残影
-	pos = pos - speed;
-	return pos;
+	oled_drawbmp_block_clear(cactus_pos + length, 6, speed); // 清除残影
+	cactus_pos = cactus_pos - speed;
+	return cactus_pos;
 }
 
 
@@ -631,13 +636,12 @@ int OLED_DrawDinoJump(char reset)
 	return height;
 }
 
-// 绘制重启
-void OLED_DrawRestart()
+// 绘制重启/结束屏幕
+void OLED_DrawRestart(uint8_t pass)
 {
 	unsigned int j=0;
 	unsigned char x, y;
 	unsigned char byte;
-	//OLED_SetPos(0, 0);
 	for (y = 2; y < 5; y++)
 	{
 		OLED_SetPos(52, y);
@@ -654,13 +658,20 @@ void OLED_DrawRestart()
 		}
 		IIC_Stop();
 	}
-	OLED_ShowString(10, 3, "GAME", 16);
-	OLED_ShowString(86, 3, "OVER", 16);
+	if (pass) {
+		OLED_ShowString(10, 3, "GAME", 16);
+		OLED_ShowString(86, 3, "PASS", 16);
+	} else {
+		OLED_ShowString(10, 3, "GAME", 16);
+		OLED_ShowString(86, 3, "OVER", 16);
+	}
 }
 // 绘制封面
-void OLED_DrawCover()
+void OLED_DrawCover(uint32_t high_score)
 {
 	OLED_DrawBMPFast(COVER);
+	OLED_ShowString(70, 0, "BEST", 12);
+	OLED_ShowNum(100, 0, high_score, 3, 12);
 }
 
 

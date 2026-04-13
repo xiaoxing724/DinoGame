@@ -74,10 +74,13 @@ int OLED_DrawDinoJump(char reset);
 // 绘制随机出现的仙人掌障碍物
 int OLED_DrawCactusRandom(unsigned char ver, unsigned char reset);
 
-// 绘制重启
-void OLED_DrawRestart(void);
+// 重置障碍物位置
+void OLED_ResetCactus(void);
+
+// 绘制重启/结束屏幕
+void OLED_DrawRestart(uint8_t pass);
 // 绘制封面
-void OLED_DrawCover(void);
+void OLED_DrawCover(uint32_t high_score);
 #endif
 
 
